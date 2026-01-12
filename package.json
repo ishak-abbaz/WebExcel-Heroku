@@ -1,0 +1,37 @@
+{
+  "name": "webexcel",
+  "version": "1.0.0",
+  "description": "A web-based product catalog and order management system with Excel import/export functionality.",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "nodemon server/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "exceljs": "^4.4.0",
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ishak-abbaz/WebExcel.git"
+  },
+  "keywords": [
+    "excel",
+    "products",
+    "orders",
+    "catalog"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ishak-abbaz/WebExcel/issues"
+  },
+  "homepage": "https://github.com/ishak-abbaz/WebExcel#readme"
+}
