@@ -41,7 +41,7 @@ async function deleteButton(){
     const reference = 'TR00029';
 
     try{
-        // Send POST request to add the item
+        // Send DELETE request to delete the item
         const response = await fetch(`/api/products/${reference}`, {
             method: 'DELETE',
         });
@@ -51,7 +51,7 @@ async function deleteButton(){
         if (result.success) {
             alert('Deletion success:', result.message);
         } else {
-            alert('Failed to add item');
+            alert('Failed to delete item');
         }
     }catch(error){
         console.log("DEBUGGING ERROR", error)

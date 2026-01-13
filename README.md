@@ -29,6 +29,3 @@ A web-based product catalog and order management system with Excel import/export
    ```bash
    git clone <your-repo-url>
    cd WebExcel
-
-
-c

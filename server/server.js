@@ -26,16 +26,11 @@ pool.query('SELECT NOW()', (err, res) => {
     }
 });
 
-// Simple route to test if server is runnning 
+// Simple route to test if server is running 
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', message: 'Server is running' });
     // res.send("Server is running");
 });
-
-// app.post('/api/products', (req, res) => {
-    // res.json({ status: 'ok', message: 'Server is adding' });
-    // res.send("Server is running");
-// });
 
 // Start server
 app.listen(PORT, () => {

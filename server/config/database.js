@@ -18,7 +18,6 @@ pool.on('connect', () => {
 // Error handling
 pool.on('error', (err) => {
     console.error('❌ Unexpected error on idle client', err);
-    process.exit(-1);
 });
 // Export pool object to use it inside other files
 module.exports = pool;

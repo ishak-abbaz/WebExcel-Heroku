@@ -5,6 +5,7 @@ node_modules/
 .env
 
 # Images
-public/images/
+public/images/products/*
+!public/images/products/.gitkeep
 # Uploads
 uploads/
