@@ -1,36 +1,7 @@
 // Import needed dependancies
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 
-// Function to clear directory
-// function clearDirectory(directoryPath) {
-//     try {
-//         if (fs.existsSync(directoryPath)) {
-//             const files = fs.readdirSync(directoryPath);
-            
-//             for (const file of files) {
-//                 const filePath = path.join(directoryPath, file);
-//                 const stat = fs.statSync(filePath);
-                
-//                 if (stat.isFile()) {
-//                     fs.unlinkSync(filePath);
-//                 } else if (stat.isDirectory()) {
-//                     // Recursively delete subdirectories
-//                     fs.rmSync(filePath, { recursive: true, force: true });
-//                 }
-//             }
-            
-//             console.log(`✅ Cleared directory: ${directoryPath}`);
-//         } else {
-//             fs.mkdirSync(directoryPath, { recursive: true });
-//             console.log(`✅ Created directory: ${directoryPath}`);
-//         }
-//     } catch (error) {
-//         console.error(`❌ Error clearing directory: ${error.message}`);
-//         // throw error;
-//     }
-// }
 
 // Configure multer temporary storage for excel file uploads
 const storage = multer.diskStorage({

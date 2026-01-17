@@ -4,7 +4,6 @@ const { upload } = require('../middleware/validateFile');
 const { importProducts } = require('../controllers/adminController');
 
 // POST /api/admin/products/import
-console.log('From admin.js');
 router.post('/products/import', upload.single('file'), importProducts);
 
 module.exports = router;    

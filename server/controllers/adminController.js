@@ -92,7 +92,7 @@ async function importProducts(req, res) {
         }
         
         res.status(500).json({
-            error: 'Failed to IMPORT products',
+            error: 'Failed to import products',
             details: error.message
         });
     } finally {

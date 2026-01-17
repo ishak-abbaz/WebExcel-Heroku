@@ -1,11 +1,9 @@
 // Import necessary modules
 const XLSX = require('xlsx');
-const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 const AdmZip = require('adm-zip');
 const xml2js = require('xml2js');
-const { json } = require('body-parser');
 
 /**
  * Clear directory contents with option to keep specific files
@@ -79,11 +77,10 @@ async function parseProductsExcel(filePath) {
     const headers = Object.keys(jsonData[0]).map(h => h.toLowerCase().trim());
     
     // Validate required columns
-    requiredColumns = ['image', 'reference', 'description', 'price exw vallmoll', 'stock'];
+    let requiredColumns = ['image', 'reference', 'description', 'price exw vallmoll', 'stock'];
     for (const required of requiredColumns) {
         if (!headers.includes(required)) {
-            return;
-            // throw new Error(`Missing required column: ${required}`);
+            return products;
         }
     }
     
@@ -111,7 +108,7 @@ async function parseProductsExcel(filePath) {
     
     // Validate first data row for required attributes
     const first_row = jsonData[0];
-    let requiredColumns = ['Reference', 'Description'];
+    requiredColumns = ['Reference', 'Description'];
     const missingAttributes = [];
     // If any required attribute is missing in row, log and return empty products
     for (const col of requiredColumns) {
