@@ -25,14 +25,6 @@
         
         <ul class="navbar-nav ml-auto">
             <div class="card-tools">
-                <!-- <label for="fileInput"
-                    class="btn btn-primary btn-sm mb-0"
-                    style="cursor:pointer;">
-                    <i class="fas fa-upload mr-1"></i> Importer fichier
-                </label> -->
-                <!-- <label for="fileInput" class="btn btn-primary">
-                    <i class="fas fa-upload"></i> Importer fichier
-                </label> -->
                 <button type="button" class="btn btn-primary btn-sm" id="uploadBtn">
                     <i class="fas fa-upload"></i> Importer fichier
                 </button>
@@ -103,37 +95,33 @@
                                     </div>
                                 </div>
                                 <div class="card-body table-responsive p-0">
-                                    <!-- <?php if (count($recent_appointments) > 0): ?> -->
-                                        <table class="table table-hover text-nowrap">
-                                            <thead>
+                                    <table class="table table-hover text-nowrap">
+                                        <thead>
+                                        <tr>
+                                            <th>Numero</th>
+                                            <th>Client</th>
+                                            <th>Date et Heure</th>
+                                            <th>Prix Totale</th>
+                                            <th>Action</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
                                             <tr>
-                                                <th>Numero</th>
-                                                <th>Client</th>
-                                                <th>Date et Heure</th>
-                                                <th>Prix Totale</th>
-                                                <th>Action</th>
-                                                <!-- <th>Time</th> -->
-                                                <!-- <th>Status</th> -->
+                                                <td>1</td>
+                                                <td>ishak</td>
+                                                <td>Jan 01, 2024 10:00</td>
+                                                <td>13 €</td>
+                                                <td class="text-nowrap">
+                                                    <button type="button" class="btn btn-success btn-sm">
+                                                        <i class="fas fa-download"></i> Télécharger
+                                                    </button>
+                                                    <button type="button" class="btn btn-danger btn-sm">
+                                                        <i class="fas fa-trash"></i> Supprimer
+                                                    </button>
+                                                </td>
                                             </tr>
-                                            </thead>
-                                            <tbody>
-                                            <!-- <?php foreach ($recent_appointments as $appointment): ?> -->
-                                                <tr>
-                                                    <td>1</td>
-                                                    <td>ishak</td>
-                                                    <td>Jan 01, 2024 10:00</td>
-                                                    <td>13 €</td>
-                                                    <td class="text-nowrap">
-                                                        <button type="button" class="btn btn-success btn-sm">
-                                                            <i class="fas fa-download"></i> Télécharger
-                                                        </button>
-                                                        <button type="button" class="btn btn-danger btn-sm">
-                                                            <i class="fas fa-trash"></i> Supprimer
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
