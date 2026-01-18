@@ -59,7 +59,7 @@ async function parseProductsExcel(filePath) {
     try {
         workbookData = XLSX.readFile(filePath, { cellFormula: true });
     } catch (error) {
-        console.error('❌ Failed to read Excel file:', error.message);
+        return products;
     }
     
     // Extract first sheet (working sheet)
@@ -85,7 +85,7 @@ async function parseProductsExcel(filePath) {
     }
     
     // Get image-to-row mapping
-    // Method used to extract right image positioning in Excel file to assign it's approprate reference
+    // Method used to extract the right image positioning in Excel file to assign it's approprate reference
     const imageMapping = await getImageRowMapping(filePath);
     
     // Create lookup map: row number -> image info
@@ -107,12 +107,12 @@ async function parseProductsExcel(filePath) {
     const extractedImages = [];
     
     // Validate first data row for required attributes
-    const first_row = jsonData[0];
+    const firstRow = jsonData[0];
     requiredColumns = ['Reference', 'Description'];
     const missingAttributes = [];
     // If any required attribute is missing in row, log and return empty products
     for (const col of requiredColumns) {
-        const value = first_row[col];
+        const value = firstRow[col];
         if (value === null || value === undefined) {
             missingAttributes.push(col);
         }
@@ -193,7 +193,7 @@ async function parseProductsExcel(filePath) {
     
     return products;
 }
-// Method used to extract right image positioning in Excel file to assign it's approprate reference
+// Method used to extract right image positioning in Excel file to assign its approprate reference
 async function getImageRowMapping(filePath) {
     try {
         const zip = new AdmZip(filePath);

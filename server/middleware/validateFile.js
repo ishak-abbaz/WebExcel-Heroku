@@ -1,4 +1,4 @@
-// Import needed dependancies
+// Import needed dependencies
 const multer = require('multer');
 const path = require('path');
 
