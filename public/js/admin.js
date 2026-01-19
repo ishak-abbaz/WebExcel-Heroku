@@ -12,7 +12,6 @@ async function uploadFile(event){
     if(!file){
         return;
     }
-    console.log('Selected file:', file.name);
     // Store file data
     const fileName = file.name;
     const fileExtension = fileName.split('.').pop().toLowerCase();

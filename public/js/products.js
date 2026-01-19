@@ -352,15 +352,76 @@ function validateOrder() {
         return;
     }
     
-    alert('Commande validée ! (Excel generation coming in Sprint 3)');
-    clearCart();    
-    // TODO: Generate Excel file
-    // TODO: Send order to database
+    // Prompt for client identifier
+    const clientIdentifier = prompt('Entrez votre identifiant client:');
+    
+    if (!clientIdentifier || !clientIdentifier.trim()) {
+        alert('Identifiant client requis pour valider la commande');
+        return;
+    }
+    // Prepare order data
+    const orderData = {
+        clientIdentifier: clientIdentifier.trim(),
+        items: items.map(item => ({
+            reference: item.reference,
+            quantity: item.quantity
+        }))
+    };
+    
+    // Send order to backend
+    fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(orderData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.error || 'Failed to create order');
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Download Excel file
+        const downloadLink = document.createElement('a');
+        downloadLink.href = data.filePath;
+        downloadLink.download = data.filePath.split('/').pop();
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        
+        // Show success message
+        // alert(`Commande créée avec succès!\nNombre de produits: ${data.productCount}\nMontant total: ${data.totalAmount} DA`);
+        alert(`Commande créée avec succès!
+Nombre de produits: ${data.productCount}
+Montant total: ${data.totalAmount} €
+Votre commande a été enregistrée avec succès.
+Votre agent commercial, Amine Telitel, vous remercie pour votre confiance.
+La facture proforma vous sera transmise dans les plus brefs délais via WhatsApp ou par e-mail.
+Il vous contactera très prochainement afin de confirmer la commande.
+Informations supplémentaires :
+En général, la préparation de la proforma prend entre 1 heure et 48 heures, selon la disponibilité de l’agent commercial.
+Après confirmation de la commande et envoi du virement, la réception du paiement est généralement confirmée dans les 24 heures.
+Si vous souhaitez envoyer un camion pour récupérer la marchandise, veuillez contacter l’agent commercial pour établir un planning.
+Si la société prend en charge l’envoi de la commande (France, Belgique), la livraison est effectuée en environ 6 à 8 jours après confirmation du paiement.
+Pour les expéditions hors Europe, les délais peuvent varier selon les prévisions des compagnies maritimes.`);
+        
+        // Clear cart
+        clearCart();
+        
+    })
+    .catch(error => {
+        alert(`Erreur lors de la création de la commande: ${error.message}`);
+    });
+    // clearCart();    
 }
 
 // Toast notification
 function showToast(message) {
-    // Simple alert for now, can be replaced with Bootstrap toast
+    // Simple alert for now
     const toast = document.createElement('div');
     toast.className = 'position-fixed bottom-0 end-0 p-3';
     toast.style.zIndex = '9999';

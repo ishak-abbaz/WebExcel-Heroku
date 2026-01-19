@@ -6,7 +6,7 @@ const path = require('path');
 require('dotenv').config();
 const adminRoutes = require('./routes/admin');
 const productsRoutes = require('./routes/products');
-
+const ordersRoutes = require('./routes/orders');
 
 // Initialize Express application and set port
 const app = express();
@@ -20,6 +20,8 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/api/admin', adminRoutes);
 app.use('/api/products', productsRoutes);
+app.use('/api/orders', ordersRoutes);
+
 // Test database connection
 const pool = require('./config/database');
 pool.query('SELECT NOW()', (err, res) => {
