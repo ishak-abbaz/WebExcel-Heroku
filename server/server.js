@@ -27,12 +27,10 @@ const pool = require('./config/database');
 pool.query('SELECT NOW()', (err, res) => {
     if (err) {
         console.error('❌ Database connection failed:', err);
-    } else {
-        console.log('✅ Database connected at:', res.rows[0].now);
     }
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

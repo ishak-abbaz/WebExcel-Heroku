@@ -235,8 +235,8 @@ input:focus {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0);
-    z-index: 1040;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1035;
 }
 
 .cart-overlay.show {
@@ -256,7 +256,14 @@ input:focus {
         margin: 0.75rem 0 0 0 !important;
         max-width: 100%;
     }
-    
+    .clear-cart{
+        min-width: 44px;
+        min-height: 44px;
+        padding: 8px;
+    }
+    .trash-icon{
+        font-size: 20px;
+    }
     .search-container .input-group {
         width: 100%;
     }
@@ -265,13 +272,13 @@ input:focus {
     }
     
     /* Hide cart on desktop breakpoint */
-    .cart-overlay {
+    /* .cart-overlay {
         display: none;
     }
     
     .cart-overlay.show {
         display: block;
-    }
+    } */
     
     /* Products take full width */
     #productsSection {

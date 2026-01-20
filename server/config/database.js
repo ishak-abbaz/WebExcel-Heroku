@@ -11,10 +11,6 @@ const pool = new Pool({
     password: process.env.DB_PASSWORD,
 });
 
-// Test connection
-pool.on('connect', () => {
-    console.log('✅ Connected to PostgreSQL database');
-});
 // Error handling
 pool.on('error', (err) => {
     console.error('❌ Unexpected error on idle client', err);

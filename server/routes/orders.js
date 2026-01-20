@@ -85,16 +85,14 @@ router.post('/', async (req, res) => {
             clientIdentifier
             // orderNumber
         });
-        // console.log(`Enriched items count: ${enrichedItems.length}`)
-        // const filePath = 'uploads/orders/file.xlsx';
         
-        // 5. Update order with file path
+        // Update order with file path
         await client.query(
             'UPDATE orders SET file_path = $1 WHERE order_number = $2',
             [filePath, orderNumber]
         );
         
-        // 6. Update stock quantities for all products
+        // Update stock quantities for all products
         for (const item of items) {
             await client.query(
                 'UPDATE products SET stock_quantity = stock_quantity - $1 WHERE reference = $2',
@@ -116,7 +114,7 @@ router.post('/', async (req, res) => {
         });
         
     } catch (error) {
-        // Rollback on error
+        // (ROLLBACK: Undo changes on error)
         await client.query('ROLLBACK');
         console.error('Order creation error:', error);
         
@@ -128,44 +126,86 @@ router.post('/', async (req, res) => {
         client.release();
     }
 });
+/**
+ * DELETE /api/orders/:id
+ * Delete an order by order_number
+ */
+router.delete('/:id', async (req, res) => {
+    const client = await pool.connect();
+    
+    try {
+        const { id } = req.params;
+        const orderNumber = parseInt(id);
+        
+        if (isNaN(orderNumber)) {
+            return res.status(400).json({ error: 'Invalid order number' });
+        }
+        
+        await client.query('BEGIN');
+        
+        // Get order details before deletion
+        const orderResult = await client.query(
+            'SELECT * FROM orders WHERE order_number = $1',
+            [orderNumber]
+        );
+        
+        if (orderResult.rows.length === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: 'Order not found' });
+        }
+        
+        const order = orderResult.rows[0];
+        
+        // Delete order from database
+        await client.query(
+            'DELETE FROM orders WHERE order_number = $1',
+            [orderNumber]
+        );
+        
+        // Delete Excel file if exists
+        const fs = require('fs');
+        const path = require('path');
+        
+        if (order.file_path) {
+            const filePath = path.join(__dirname, '../../', order.file_path);
+            
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+        }
+        
+        await client.query('COMMIT');
+        
+        res.json({
+            success: true,
+            message: 'Order deleted successfully',
+            orderNumber
+        });
+        
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error deleting order:', error);
+        res.status(500).json({ error: 'Failed to delete order' });
+        
+    } finally {
+        client.release();
+    }
+});
 
 /**
  * GET /api/orders
  * Get all orders (for admin dashboard - Sprint 4)
  */
-// router.get('/', async (req, res) => {
-//     try {
-//         const result = await pool.query(
-//             'SELECT * FROM orders ORDER BY created_at DESC'
-//         );
-//         res.json(result.rows);
-//     } catch (error) {
-//         console.error('Error fetching orders:', error);
-//         res.status(500).json({ error: 'Failed to fetch orders' });
-//     }
-// });
-
-/**
- * GET /api/orders/:id
- * Get specific order details
- */
-// router.get('/:id', async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const result = await pool.query(
-//             'SELECT * FROM orders WHERE order_number = $1',
-//             [id]
-//         );
-        
-//         if (result.rows.length === 0) {
-//             return res.status(404).json({ error: 'Order not found' });
-//         }
-        
-//         res.json(result.rows[0]);
-//     } catch (error) {
-//         console.error('Error fetching order:', error);
-//         res.status(500).json({ error: 'Failed to fetch order' });
-//     }
-// });
+router.get('/', async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT * FROM orders ORDER BY created_at ASC'
+        ); 
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        res.status(500).json({ error: 'Failed to fetch orders' });
+    }
+});
 
 module.exports = router;

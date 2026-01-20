@@ -316,6 +316,13 @@ function removeFromCart(reference) {
 
 // Clear entire cart
 function clearCart() {
+    const items = Object.values(cart);
+    
+    if (items.length === 0) {
+        alert('Votre panier est vide');
+        return;
+    }
+    
     if (confirm('Vider le panier ?')) {
         cart = {};
         localStorage.setItem('cart', JSON.stringify(cart));
@@ -385,7 +392,7 @@ function validateOrder() {
         return response.json();
     })
     .then(data => {
-        // Download Excel file
+        // Download Excel file(By creating html element to download file and click it then)
         const downloadLink = document.createElement('a');
         downloadLink.href = data.filePath;
         downloadLink.download = data.filePath.split('/').pop();
