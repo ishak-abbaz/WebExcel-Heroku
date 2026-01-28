@@ -20,12 +20,6 @@ input:focus {
   outline: none;
 }
 
-/* Logo Circle */
-/* .logo-circle {
-    width: 35px;
-    height: 35px;
-    font-size: 18px;
-} */
 
 /* Teal Button Styling */
 .btn-teal {
@@ -192,6 +186,10 @@ input:focus {
     margin-bottom: 20px;
 }
 
+.cart-footer {
+    position: sticky;
+}
+
 /* Cart Item Card */
 .cart-item {
     border: 1px solid #e0e0e0;
@@ -245,6 +243,9 @@ input:focus {
 
 /* Mobile Responsive */
 @media (max-width: 991px) {
+    .cart-footer{
+        bottom: 10vh;
+    }
     .cart-sidebar {
         width: 85%;
         max-width: 400px;
@@ -421,4 +422,13 @@ input:focus {
     font-weight: 600;
     background-color: #f8f9fa;
     width: 40%;
+}
+/* Sales Agent Link Hover Effect */
+.brand-text:hover {
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.brand-text:hover .bi-info-circle {
+    color: #2FA3A1 !important;
 }

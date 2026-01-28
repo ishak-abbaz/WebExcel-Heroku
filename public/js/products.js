@@ -34,22 +34,56 @@ async function loadProducts() {
         if (!response.ok) throw new Error('Failed to fetch products');
         
         products = await response.json();
-        
-        // Clear grid and display products
-        grid.innerHTML = '';
-        
-        if (products.length === 0) {
-            grid.innerHTML = '<div class="col-12 text-center py-5"><p class="text-muted">Aucun produit disponible</p></div>';
-            return;
-        }
-        
-        products.forEach(product => {
-            const productCard = createProductCard(product);
-            grid.appendChild(productCard);
-        });
+        // console.log(products[0].extra.dun.toUpperCase());
+        displayProducts(products);
+
     } catch (error) {
         grid.innerHTML = '<div class="col-12 text-center py-5"><p class="text-danger">Erreur lors du chargement des produits</p></div>';
     }
+}
+
+// Search and filter products
+function searchProducts(searchTerm) {
+    const term = searchTerm.toLowerCase().trim();
+    
+    // If search is empty, show all products
+    if (!term) {
+        displayProducts(products);
+        return;
+    }
+    
+    // Filter products by reference or description
+    const filteredProducts = products.filter(product => {
+        const reference = product.reference.toLowerCase();
+        const description = product.description.toLowerCase();
+        
+        return reference.includes(term) || description.includes(term);
+    });
+    
+    // Display filtered results
+    displayProducts(filteredProducts);
+    
+    // Show message if no results
+    if (filteredProducts.length === 0) {
+        const grid = document.getElementById('productsGrid');
+        grid.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-search fs-1 text-muted"></i>
+                <p class="text-muted mt-3">Aucun produit trouvé pour "${searchTerm}"</p>
+            </div>
+        `;
+    }
+}
+
+// Display products (extracted from loadProducts)
+function displayProducts(productsToDisplay) {
+    const grid = document.getElementById('productsGrid');
+    grid.innerHTML = '';
+    
+    productsToDisplay.forEach(product => {
+        const card = createProductCard(product);
+        grid.appendChild(card);
+    });
 }
 
 // Create product card HTML
@@ -103,19 +137,41 @@ function createProductCard(product) {
             </div>
         </div>
     `;
-    
     return col;
 }
 
 // Initialize event listeners
 function initializeEventListeners() {
     
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = searchInput.parentElement.querySelector('button');
+
+    // Search on button click
+    searchBtn.addEventListener('click', () => {
+        searchProducts(searchInput.value);
+    });
+
+    // Search on Enter key
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            searchProducts(searchInput.value);
+        }
+    });
+
+    // Real-time search
+    searchInput.addEventListener('input', (e) => {
+        searchProducts(e.target.value);
+    });
+
     // Clear cart
-    document.getElementById('clearCartBtn').addEventListener('click', clearCart);
+    document.getElementById('clearCartBtn').addEventListener('click', showClearCartModal);
     
     // Validate order
     document.getElementById('validateOrderBtn').addEventListener('click', validateOrder);
-    
+    // Confirm order button in modal
+    document.getElementById('confirmOrderBtn').addEventListener('click', confirmOrder);
+
     // Product quantity controls
     document.getElementById('productsGrid').addEventListener('click', handleProductInteraction);
     document.getElementById('productsGrid').addEventListener('input', handleQuantityInput);
@@ -126,6 +182,15 @@ function initializeEventListeners() {
     
     cartToggleBtn.addEventListener('click', toggleCart);
     cartOverlay.addEventListener('click', toggleCart);
+
+    // Confirm clear cart button in modal
+    document.getElementById('confirmClearCartBtn').addEventListener('click', function() {
+        // Close the modal
+        $('#clearCartModal').modal('hide');
+        
+        // Clear the cart
+        clearCart();
+    });
 
     // Initialize modal listeners
     initializeModalListeners();
@@ -230,9 +295,6 @@ function updateCartUI() {
         cartCount = document.getElementById('cartCount');
         cartTotal = document.getElementById('cartTotal');
     }
-    // const cartItems = document.getElementById('cartItems');
-    // const cartCount = document.getElementById('cartCount');
-    // const cartTotal = document.getElementById('cartTotal');
     
     const items = Object.values(cart);
     
@@ -322,13 +384,13 @@ function clearCart() {
         alert('Votre panier est vide');
         return;
     }
-    
-    if (confirm('Vider le panier ?')) {
+
+    // if (confirm('Vider le panier ?')) {
         cart = {};
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartUI();
         loadProducts(); // Reload to reset all cards
-    }
+    // }
 }
 
 function toggleCart() {
@@ -350,7 +412,6 @@ function toggleCart() {
     }
 }
 
-// Validate order
 function validateOrder() {
     const items = Object.values(cart);
     
@@ -359,22 +420,64 @@ function validateOrder() {
         return;
     }
     
-    // Prompt for client identifier
-    const clientIdentifier = prompt('Entrez votre identifiant client:');
+    // Clear previous input values and errors
+    document.getElementById('clientIdentifier').value = '';
+    document.getElementById('clientIdentifierValidation').value = '';
+    document.getElementById('clientIdentifier').classList.remove('is-invalid');
+    document.getElementById('clientIdentifierValidation').classList.remove('is-invalid');
+    // Show client identifier modal
+    $('#clientIdentifierModal').modal('show');
+}
+
+function confirmOrder() {
     
-    if (!clientIdentifier || !clientIdentifier.trim()) {
-        alert('Identifiant client requis pour valider la commande');
+    const clientIdentifier = document.getElementById('clientIdentifier').value.trim();
+    const clientIdentifierValidation = document.getElementById('clientIdentifierValidation').value.trim();
+    
+    // Validate inputs
+    let isValid = true;
+    
+    if (!clientIdentifier) {
+        document.getElementById('clientIdentifier').classList.add('is-invalid');
+        isValid = false;
+    } else {
+        document.getElementById('clientIdentifier').classList.remove('is-invalid');
+    }
+    
+    if (!clientIdentifierValidation) {
+        document.getElementById('clientIdentifierValidation').classList.add('is-invalid');
+        isValid = false;
+        document.getElementById('validationEmptyError').style.display = 'block';
+        document.getElementById('validationMismatchError').style.display = 'none';
+    } else {
+        document.getElementById('clientIdentifierValidation').classList.remove('is-invalid');
+    }
+    if (clientIdentifier !== clientIdentifierValidation) {
+        document.getElementById('clientIdentifierValidation').classList.add('is-invalid');
+        isValid = false;
+        document.getElementById('validationEmptyError').style.display = 'none';
+        document.getElementById('validationMismatchError').style.display = 'block';
+        
+    } else {
+        document.getElementById('clientIdentifierValidation').classList.remove('is-invalid');
+    }
+    
+    if (!isValid) {
         return;
     }
+    
+    // Close modal
+    $('#clientIdentifierModal').modal('hide');
+    
+    const items = Object.values(cart);
     // Prepare order data
     const orderData = {
-        clientIdentifier: clientIdentifier.trim(),
+        clientIdentifier: clientIdentifier,
         items: items.map(item => ({
             reference: item.reference,
             quantity: item.quantity
         }))
     };
-    
     // Send order to backend
     fetch('/api/orders', {
         method: 'POST',
@@ -392,7 +495,7 @@ function validateOrder() {
         return response.json();
     })
     .then(data => {
-        // Download Excel file(By creating html element to download file and click it then)
+        // Download Excel file
         const downloadLink = document.createElement('a');
         downloadLink.href = data.filePath;
         downloadLink.download = data.filePath.split('/').pop();
@@ -401,7 +504,6 @@ function validateOrder() {
         document.body.removeChild(downloadLink);
         
         // Show success message
-        // alert(`Commande créée avec succès!\nNombre de produits: ${data.productCount}\nMontant total: ${data.totalAmount} DA`);
         alert(`Commande créée avec succès!
 Nombre de produits: ${data.productCount}
 Montant total: ${data.totalAmount} €
@@ -410,20 +512,18 @@ Votre agent commercial, Amine Telitel, vous remercie pour votre confiance.
 La facture proforma vous sera transmise dans les plus brefs délais via WhatsApp ou par e-mail.
 Il vous contactera très prochainement afin de confirmer la commande.
 Informations supplémentaires :
-En général, la préparation de la proforma prend entre 1 heure et 48 heures, selon la disponibilité de l’agent commercial.
+En général, la préparation de la proforma prend entre 1 heure et 48 heures, selon la disponibilité de l'agent commercial.
 Après confirmation de la commande et envoi du virement, la réception du paiement est généralement confirmée dans les 24 heures.
-Si vous souhaitez envoyer un camion pour récupérer la marchandise, veuillez contacter l’agent commercial pour établir un planning.
-Si la société prend en charge l’envoi de la commande (France, Belgique), la livraison est effectuée en environ 6 à 8 jours après confirmation du paiement.
+Si vous souhaitez envoyer un camion pour récupérer la marchandise, veuillez contacter l'agent commercial pour établir un planning.
+Si la société prend en charge l'envoi de la commande (France, Belgique), la livraison est effectuée en environ 6 à 8 jours après confirmation du paiement.
 Pour les expéditions hors Europe, les délais peuvent varier selon les prévisions des compagnies maritimes.`);
         
         // Clear cart
         clearCart();
-        
     })
     .catch(error => {
         alert(`Erreur lors de la création de la commande: ${error.message}`);
     });
-    // clearCart();    
 }
 
 // Toast notification
@@ -444,10 +544,9 @@ function showToast(message) {
     setTimeout(() => toast.remove(), 2000);
 }
 
-// Modal functionality
 let currentModalProduct = null;
 let modalQuantity = 0;
-
+// Modal functionality
 function openProductModal(reference, currentQuantity) {
     const product = products.find(p => p.reference === reference);
     if (!product) return;
@@ -483,20 +582,25 @@ function openProductModal(reference, currentQuantity) {
     document.getElementById('modalProductTitle').textContent = product.description;
     document.getElementById('modalProductPrice').textContent = product.price_per_unit + ' €';
     document.getElementById('modalProductStock').textContent = `En Stock: ${product.stock_quantity}`;
-    
     // Build details table (using dummy data for now - will be replaced with real DB data)
-    const details = `
-        <tr><td>Reference:</td><td>${product.reference}</td></tr>
-        <tr><td>EAN:</td><td>8001480020429</td></tr>
-        <tr><td>Date d'expiration:</td><td>No</td></tr>
-        <tr><td>U Box:</td><td>10</td></tr>
-        <tr><td>Box Layer:</td><td>7</td></tr>
-        <tr><td>UD/Pal U Palet:</td><td>350</td></tr>
-        <tr><td>Box Patel:</td><td>35</td></tr>
-        <tr><td>DUN:</td><td>08001480109704</td></tr>
-        <tr><td>Languages:</td><td>espagnol, francais</td></tr>
-        <tr><td>PESO:</td><td>22.5</td></tr>
-    `;
+    // Start with fixed Reference row
+    let details = `<tr><td><strong>Reference:</strong></td><td>${product.reference}</td></tr>`;
+
+    // Add dynamic rows from product.extra if it exists
+    if (product.extra && typeof product.extra === 'object') {
+        // Loop through each property in the extra object
+        for (const [key, value] of Object.entries(product.extra)) {
+            // Format the key (capitalize first letter, replace underscores with spaces)
+            const formattedKey = key
+                .split('_')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+            
+            // Add row for each property
+            details += `<tr><td><strong>${formattedKey}:</strong></td><td>${value || 'N/A'}</td></tr>`;
+        }
+    }
+
     document.getElementById('modalProductDetails').innerHTML = details;
     
     // Set quantity input
@@ -562,4 +666,18 @@ function initializeModalListeners() {
         }
     });
     
+}
+
+// Show clear cart confirmation modal
+function showClearCartModal() {
+    const items = Object.values(cart);
+    
+    // Check if cart is empty
+    if (items.length === 0) {
+        alert('Votre panier est déjà vide');
+        return;
+    }
+    
+    // Show modal
+    $('#clearCartModal').modal('show');
 }

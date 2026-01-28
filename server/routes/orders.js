@@ -9,7 +9,6 @@ const { generateOrderExcel } = require('../utils/excelGenerator');
  */
 router.post('/', async (req, res) => {
     const { clientIdentifier, items } = req.body;
-    // console.log('We are recieving data');
     // Validation
     if (!clientIdentifier || !clientIdentifier.trim()) {
         return res.status(400).json({ error: 'Client identifier is required' });
@@ -24,7 +23,6 @@ router.post('/', async (req, res) => {
     
     try {
         await client.query('BEGIN');
-        
         // Fetch all products from database
         const allProductsQuery = await client.query(
             'SELECT reference, description, price_per_unit, stock_quantity, extra_columns FROM products ORDER BY reference'
@@ -33,11 +31,10 @@ router.post('/', async (req, res) => {
         const orderedItemsMap = new Map(
             items.map(item => [item.reference, item.quantity])
         );
-        
+        const orderedItems = []
         // Validate stock for ordered items only
         for (const item of items) {
             const product = allProductsQuery.rows.find(p => p.reference === item.reference);
-            
             if (!product) {
                 throw new Error(`Product ${item.reference} not found`);
             }
@@ -45,10 +42,10 @@ router.post('/', async (req, res) => {
             if (product.stock_quantity < item.quantity) {
                 throw new Error(`Insufficient stock for ${item.reference}. Available: ${product.stock_quantity}, Requested: ${item.quantity}`);
             }
+            orderedItems.push(product);
         }
         
-        // Build enriched items with ALL products
-        const enrichedItems = allProductsQuery.rows.map(product => {
+        const enrichedItems = orderedItems.map(product => {
             const orderedQuantity = orderedItemsMap.get(product.reference) || 0;
             
             return {
@@ -60,7 +57,6 @@ router.post('/', async (req, res) => {
                 extra_columns: product.extra_columns || {}
             };
         });
-
         // Calculate totals
         const productCount = enrichedItems.reduce((sum, item) => sum + item.quantity, 0);
         const totalAmount = enrichedItems

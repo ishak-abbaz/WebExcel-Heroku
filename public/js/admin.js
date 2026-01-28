@@ -40,9 +40,6 @@ async function fileInputHandler(event){
         showToast('Erreur lors de l\'importation', 'error');
     }
 }
-// document.getElementById('fileInput').addEventListener('change', async (e) => {
-    // 
-// });
 
 async function uploadFile(event){
     // Retrieve selected file
@@ -252,7 +249,7 @@ async function deleteOrder(orderNumber) {
         
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.error || 'Failed to delete order');
+            throw new Error(error.error || 'Echec de supprimer la commande');
         }
         
         // Close modal

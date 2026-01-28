@@ -78,6 +78,7 @@ async function parseProductsExcel(filePath) {
     
     // Validate required columns
     let requiredColumns = ['image', 'reference', 'description', 'price exw vallmoll', 'stock'];
+    console.log('Headers found in Excel:', headers);
     for (const required of requiredColumns) {
         if (!headers.includes(required)) {
             return products;

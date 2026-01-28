@@ -4,22 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebExcel - Products</title>
-    <script src="plugins/jquery/jquery-3.6.0.min.js"></script>
-    <link href="plugins/bootstrap/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="plugins/bootstrap/bootstrap-icons.css">
-    <link rel="stylesheet" href="css/products.css">
+    <link rel="stylesheet" href="./plugins/adminlte/adminlte.min.css">
+    <link rel="stylesheet" href="./plugins/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="./plugins/bootstrap/bootstrap-icons.css">
+    <link rel="stylesheet" href="./css/products.css">
 </head>
 <body>
     <!-- Top Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
         <div class="container-fluid px-4">
             <!-- Logo -->
-            <span class="brand-text">
-                <div class="mb-1 font-weight-bold" style="font-size: 20px; color: #2FA3A1; line-height: 1.3;">Commande & relation clients</div>
-                <small class="text-muted" style="font-size: 16px; line-height: 1.2;">
-                    Votre commercielle: Amine Telitel
+            <a href="" class="brand-text text-decoration-none" data-toggle="modal" data-target="#salesAgentModal" style="cursor: pointer;">
+                <div class="mb-1 font-weight-bold" style="font-size: 20px; color: #2FA3A1; line-height: 1.3;">
+                    Commande & Relation Clients
+                </div>
+                <small class="text-muted d-block" style="font-size: 14px; line-height: 1.2;">
+                    <i class="bi"></i> Votre commercial: Amine Telitel
+                    <i class="bi bi-info-circle ms-1" style="font-size: 11px;"></i>
                 </small>
-            </span>
+            </a>
 
             <!-- Search Bar -->
             <div class="search-container ms-auto me-3">
@@ -79,13 +82,12 @@
 
                     <!-- Cart Items -->
                     <div class="cart-items" id="cartItems">
-                        <!-- Cart items will be loaded here by products.js -->
-                        <div class="text-center text-muted py-5" id="emptyCartMessage">
+                        <!-- Cart items will be loaded here by products.js file -->
+                        <div class="text-center text-muted py-5" id="emptyCartMessage" data-target="#cartEmptyModal">
                             <i class="bi bi-cart-x fs-1 d-block mb-2"></i>
                             <p>Votre panier est vide</p>
                         </div>
                     </div>
-
                     <!-- Cart Order Validation Button -->
                     <div class="cart-footer border-top pt-3 mt-auto">
                         <button class="btn btn-teal w-100" id="validateOrderBtn">
@@ -106,7 +108,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header border-0" >
-                    <button id="modalBtnClose" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button id="modalBtnClose" type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
@@ -148,7 +150,123 @@
             </div>
         </div>
     </div>
+    
+    <!-- Sales Agent Info Modal -->
+    <div class="modal fade" id="salesAgentModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #2F5F6F;">
+                    <h4 class="modal-title text-white">
+                        <i class="fas fa-user-tie"></i> Informations Commercial
+                    </h4>
+                    <button type="button" class="close text-white" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <img src="plugins/img/admin__demo_image.jpg" 
+                            class="img-circle elevation-2" 
+                            alt="Amine Telitel" 
+                            width="100">
+                        <h5 class="mt-3 mb-0"><strong>AMINE TELITEL</strong></h5>
+                        <p class="text-muted">Sales Agent</p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <p><i class="fas fa-mobile-alt text-primary mr-2"></i> <strong>Mobile:</strong> 0035 26 61 25 16 25</p>
+                        <p><i class="fas fa-phone text-primary mr-2"></i> <strong>Tel:</strong> +34 977 609 858</p>
+                        <p><i class="fas fa-envelope text-primary mr-2"></i> <strong>Email:</strong> 
+                            <a href="mailto:amine@tarracoimportexport.com">amine@tarracoimportexport.com</a>
+                        </p>
+                        <p><i class="fas fa-globe text-primary mr-2"></i> <strong>Website:</strong> 
+                            <a href="https://tienda.tarracoimportexport.com" target="_blank">tienda.tarracoimportexport.com</a>
+                        </p>
+                        <p><i class="fas fa-map-marker-alt text-primary mr-2"></i> <strong>Address:</strong><br>
+                            Carretera de la Masó s/n<br>
+                            Km. 2,9 - 43144 Vallmoll<br>
+                            TARRAGONA (Spain)
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Client Identifier Modal -->
+    <div class="modal fade" id="clientIdentifierModal" tabindex="-1" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #2F5F6F;">
+                    <h5 class="modal-title text-white">
+                        <i class="fas fa-user-check"></i> Validation de la commande
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-4">Veuillez renseigner vos informations pour valider votre commande</p>
+                    
+                    <div class="form-group mb-3">
+                        <label for="clientIdentifier" class="form-label">
+                            <i class="fas fa-user"></i> Identifiant client <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="clientIdentifier" placeholder="Entrez l'identifiant" required>
+                        <div class="invalid-feedback">Ce champ est requis</div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label for="clientIdentifierValidation" class="form-label">
+                            <i class="fas fa-phone"></i> Valider identifiant client <span class="text-danger">*</span>
+                        </label>
+                        <input type="tel" class="form-control" id="clientIdentifierValidation" placeholder="Entrez l'identifiant" required>
+                        <div class="invalid-feedback" id="validationEmptyError">Ce champ est requis</div>
+                        <div class="invalid-feedback" id="validationMismatchError">Les identifiants ne correspondent pas</div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3" style="font-size: 0.9rem;">
+                        <i class="fas fa-info-circle"></i> Ces informations seront utilisées pour le suivi de votre commande
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-success" id="confirmOrderBtn">
+                        <i class="fas fa-check"></i> Valider la commande
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Clear Cart Confirmation Modal -->
+    <div class="modal fade" id="clearCartModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #dc3545;">
+                    <h5 class="modal-title text-white">
+                        <i class="fas fa-exclamation-triangle"></i> Confirmer la suppression
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Êtes-vous sûr de vouloir vider votre panier ?</p>
+                    <p class="text-muted mb-0"><small>Cette action ne peut pas être annulée.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-danger" id="confirmClearCartBtn">
+                        <i class="fas fa-trash"></i> Vider le panier
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <script src="plugins/jquery/jquery-3.6.0.min.js"></script>
     <script src="plugins/bootstrap/bootstrap.bundle.min.js"></script>
     <script src="js/products.js"></script>
 </body>
