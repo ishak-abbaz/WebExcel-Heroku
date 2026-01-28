@@ -77,7 +77,7 @@ async function parseProductsExcel(filePath) {
     const headers = Object.keys(jsonData[0]).map(h => h.toLowerCase().trim());
     
     // Validate required columns
-    let requiredColumns = ['image', 'reference', 'description', 'price exw vallmoll', 'stock'];
+    let requiredColumns = ['image', 'reference', 'description', 'price exw vallmoll', 'stock', 'u.box'];
     console.log('Headers found in Excel:', headers);
     for (const required of requiredColumns) {
         if (!headers.includes(required)) {
@@ -108,20 +108,20 @@ async function parseProductsExcel(filePath) {
     const extractedImages = [];
     
     // Validate first data row for required attributes
-    const firstRow = jsonData[0];
-    requiredColumns = ['Reference', 'Description'];
-    const missingAttributes = [];
-    // If any required attribute is missing in row, log and return empty products
-    for (const col of requiredColumns) {
-        const value = firstRow[col];
-        if (value === null || value === undefined) {
-            missingAttributes.push(col);
-        }
-    }
+    // const firstRow = jsonData[0];
+    // requiredColumns = ['Reference', 'Description'];
+    // const missingAttributes = [];
+    // // If any required attribute is missing in row, log and return empty products
+    // for (const col of requiredColumns) {
+    //     const value = firstRow[col];
+    //     if (value === null || value === undefined) {
+    //         missingAttributes.push(col);
+    //     }
+    // }
 
-    if (missingAttributes.length > 0) {
-        return products;
-    }
+    // if (missingAttributes.length > 0) {
+    //     return products;
+    // }
 
     // Clear images directory from previous images
     clearDirectory(imageDir, ['.gitkeep']);
@@ -137,7 +137,6 @@ async function parseProductsExcel(filePath) {
                     
                     if (rowIndex >= 0 && rowIndex < jsonData.length) {
                         const reference = jsonData[rowIndex].Reference;
-                        
                         if (reference) {
                             const ext = path.extname(imgInfo.imageFileName);
                             const fileName = `${reference}${ext}`;
@@ -172,17 +171,17 @@ async function parseProductsExcel(filePath) {
         Object.keys(row).forEach(key => {
             rowData[key.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_')] = row[key];
         });
-        
         const product = {
             image_url: rowData.image || null,
             reference: rowData.reference,
             description: rowData.description,
             price_per_unit: parseFloat(rowData.price_exw_vallmoll) || 0,
             stock_quantity: parseInt(rowData.stock) || 0,
+            units_per_box: parseInt(rowData.u_box) || 1,
             extra_columns: {}
         };
         // Storing extra columns data
-        const usedColumns = ['image', 'reference', 'description', 'price_exw_vallmoll', 'stock'];
+        const usedColumns = ['image', 'reference', 'description', 'price_exw_vallmoll', 'stock', 'u_box'];
         Object.keys(rowData).forEach(key => {
             if (!usedColumns.includes(key) && rowData[key] !== null && rowData[key] !== undefined) {
                 product.extra_columns[key] = rowData[key];

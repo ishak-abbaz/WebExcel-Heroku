@@ -41,8 +41,8 @@ async function importProducts(req, res) {
                 const chunk = products.slice(i, i + CHUNK_SIZE);
                 // Prepare parameterized query for batch insert(CHUNK_SIZE inserts at once)
                 const values = chunk.map((_, idx) => {
-                    const offset = idx * 6;
-                    return `($${offset+1}, $${offset+2}, $${offset+3}, $${offset+4}, $${offset+5}, $${offset+6})`;
+                    const offset = idx * 7;
+                    return `($${offset+1}, $${offset+2}, $${offset+3}, $${offset+4}, $${offset+5}, $${offset+6}, $${offset+7})`;
                 }).join(', ');
                 // Parameters for all products in chunk
                 const params = chunk.flatMap(p => [
@@ -51,13 +51,14 @@ async function importProducts(req, res) {
                     p.price_per_unit,
                     p.stock_quantity,
                     p.image_url,
-                    JSON.stringify(p.extra_columns)
+                    JSON.stringify(p.extra_columns),
+                    p.units_per_box
                 ]);
                 // Final query for the chunk insertion
                 const query = `
                     INSERT INTO products (
                         reference, description, price_per_unit, 
-                        stock_quantity, image_url, extra_columns
+                        stock_quantity, image_url, extra_columns, units_per_box
                     )
                     VALUES ${values}
                 `;
