@@ -28,14 +28,23 @@ async function loadProducts() {
     
     // Show loading state
     grid.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
-    
+  
     try {
         const response = await fetch('/api/products');
         if (!response.ok) throw new Error('Failed to fetch products');
         
         products = await response.json();
-        // console.log(products[0].extra.dun.toUpperCase());
+
+        if(products.length === 0) {
+              grid.innerHTML = `
+  <div class="col-12 text-center py-5">
+    <i class="bi bi-box-seam" style="font-size: 4rem; color: #6c757d;"></i>
+    <p class="text-muted mt-3 mb-0">No products found</p>
+  </div>
+`;
+        } else {
         displayProducts(products);
+        }
 
     } catch (error) {
         grid.innerHTML = '<div class="col-12 text-center py-5"><p class="text-danger">Erreur lors du chargement des produits</p></div>';
@@ -315,7 +324,7 @@ function updateCartUI() {
     
     const cartHTML = items.map(item => {
         totalItems += item.quantity;
-        totalPrice += item.price_per_unit * item.quantity;
+        totalPrice += item.price_per_unit * item.quantity * item.units_per_box;
         const hasImage = item.image_url && item.image_url.trim() !== '' && item.image_url.toUpperCase() !== 'NO IMAGE';
         
         return `
@@ -475,7 +484,8 @@ function confirmOrder() {
         clientIdentifier: clientIdentifier,
         items: items.map(item => ({
             reference: item.reference,
-            quantity: item.quantity
+            quantity: item.quantity,
+            units_per_box: item.units_per_box
         }))
     };
     // Send order to backend
@@ -504,7 +514,7 @@ function confirmOrder() {
         document.body.removeChild(downloadLink);
         
         // Show success message
-        alert(`Commande créée avec succès!
+        showToast(`Commande créée avec succès!
 Nombre de produits: ${data.productCount}
 Montant total: ${data.totalAmount} €
 Votre commande a été enregistrée avec succès.
@@ -541,7 +551,7 @@ function showToast(message) {
     `;
     document.body.appendChild(toast);
     
-    setTimeout(() => toast.remove(), 2000);
+    setTimeout(() => toast.remove(), 20000);
 }
 
 let currentModalProduct = null;
@@ -584,7 +594,8 @@ function openProductModal(reference, currentQuantity) {
     document.getElementById('modalProductStock').textContent = `En Stock: ${product.stock_quantity}`;
     // Build details table (using dummy data for now - will be replaced with real DB data)
     // Start with fixed Reference row
-    let details = `<tr><td><strong>Reference:</strong></td><td>${product.reference}</td></tr>`;
+    let details = `<tr><td><strong>Reference:</strong></td><td>${product.reference}</td></tr>
+                   <tr><td><strong>Unite par box:</strong></td><td>${product.units_per_box}</td></tr>`;
 
     // Add dynamic rows from product.extra if it exists
     if (product.extra && typeof product.extra === 'object') {
@@ -626,7 +637,7 @@ function openProductModal(reference, currentQuantity) {
 function updateModalTotal() {
     if (!currentModalProduct) return;
     
-    const total = currentModalProduct.price_per_unit * modalQuantity;
+    const total = currentModalProduct.price_per_unit * modalQuantity * currentModalProduct.units_per_box;
     document.getElementById('modalTotal').textContent = total.toFixed(2) + ' €';
 }
 

@@ -7,7 +7,7 @@ const pool = require('../config/database');
 router.get('/', async (req, res) => {
     try {
         const result = await pool.query(
-            'SELECT reference, description, price_per_unit, stock_quantity, image_url, extra_columns extra FROM products ORDER BY description ASC;'
+            'SELECT reference, description, price_per_unit, stock_quantity, image_url, extra_columns extra, units_per_box FROM products ORDER BY description ASC;'
         );
         res.json(result.rows);
     } catch (error) {

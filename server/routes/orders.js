@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/database');
-const { generateOrderExcel } = require('../utils/excelGenerator');
+// const { generateOrderExcel } = require('../utils/excelGenerator');
+const { generateOrderExcel } = require('../utils/excelFiller');
 
 /**
  * POST /api/orders
@@ -24,8 +25,9 @@ router.post('/', async (req, res) => {
     try {
         await client.query('BEGIN');
         // Fetch all products from database
+        //TODO: better retrieve only ordered products from database rather than all products
         const allProductsQuery = await client.query(
-            'SELECT reference, description, price_per_unit, stock_quantity, extra_columns FROM products ORDER BY reference'
+            'SELECT reference, description, price_per_unit, stock_quantity, extra_columns, units_per_box FROM products ORDER BY reference'
         );
         // Create a map of ordered items for quick lookup
         const orderedItemsMap = new Map(
@@ -46,7 +48,7 @@ router.post('/', async (req, res) => {
         }
         
         const enrichedItems = orderedItems.map(product => {
-            const orderedQuantity = orderedItemsMap.get(product.reference) || 0;
+            const orderedQuantity = orderedItemsMap.get(product.reference) * product.units_per_box || 0;
             
             return {
                 reference: product.reference,
@@ -54,7 +56,8 @@ router.post('/', async (req, res) => {
                 price_per_unit: parseFloat(product.price_per_unit),
                 stock_quantity: product.stock_quantity,
                 quantity: orderedQuantity,
-                extra_columns: product.extra_columns || {}
+                extra_columns: product.extra_columns || {},
+                units_per_box: product.units_per_box
             };
         });
         // Calculate totals
@@ -90,9 +93,10 @@ router.post('/', async (req, res) => {
         
         // Update stock quantities for all products
         for (const item of items) {
+            const orderedQuantity = item.quantity * item.units_per_box;
             await client.query(
                 'UPDATE products SET stock_quantity = stock_quantity - $1 WHERE reference = $2',
-                [item.quantity, item.reference]
+                [orderedQuantity, item.reference]
             );
         }
         

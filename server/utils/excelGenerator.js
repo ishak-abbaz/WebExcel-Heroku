@@ -32,6 +32,7 @@ async function generateOrderExcel(orderData) {
         { header: 'Quantity', key: 'quantity', width: 12 },
         { header: 'Stock', key: 'stock_quantity', width: 12 },
         { header: 'Total', key: 'total', width: 12 },
+        { header: 'U.Box', key: 'u.box', width: 12 },
     ];
     
     // Add extra columns dynamically
@@ -64,7 +65,8 @@ async function generateOrderExcel(orderData) {
             price_per_unit: item.price_per_unit,
             quantity: item.quantity,
             stock_quantity: item.stock_quantity,
-            total: item.price_per_unit * item.quantity
+            total: item.price_per_unit * item.quantity,
+            'u.box': item.units_per_box
         };
         
         // Add extra columns data
