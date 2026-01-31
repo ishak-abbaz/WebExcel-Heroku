@@ -37,13 +37,13 @@ async function loadProducts() {
 
         if(products.length === 0) {
               grid.innerHTML = `
-  <div class="col-12 text-center py-5">
-    <i class="bi bi-box-seam" style="font-size: 4rem; color: #6c757d;"></i>
-    <p class="text-muted mt-3 mb-0">No products found</p>
-  </div>
-`;
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-box-seam" style="font-size: 4rem; color: #6c757d;"></i>
+                    <p class="text-muted mt-3 mb-0">No products found</p>
+                </div>
+                `;
         } else {
-        displayProducts(products);
+            displayProducts(products);
         }
 
     } catch (error) {
@@ -340,7 +340,10 @@ function updateCartUI() {
                     <div class="flex-grow-1">
                         <div class="cart-item-title">${item.description}</div>
                         <div class="cart-item-price">${item.price_per_unit} €</div>
-                        <div class="cart-item-quantity">Qté: ${item.quantity}</div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="cart-item-quantity">Qté: ${item.quantity} x ${item.units_per_box}</div>
+                            <div class="cart-item-quantity">Totale ${item.quantity * item.units_per_box * item.price_per_unit} €</div>
+                        </div>
                     </div>
                     <button class="btn btn-sm btn-link text-danger" onclick="removeFromCart('${item.reference}')">
                         <i class="bi bi-x"></i>
@@ -552,6 +555,57 @@ function showToast(message) {
     document.body.appendChild(toast);
     
     setTimeout(() => toast.remove(), 20000);
+}
+
+function showDialog(message) {
+    // Create modal backdrop
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop fade show';
+    backdrop.style.zIndex = '1040';
+    
+    // Create modal dialog
+    const dialog = document.createElement('div');
+    dialog.className = 'modal fade show';
+    dialog.style.display = 'block';
+    dialog.style.zIndex = '1050';
+    dialog.setAttribute('tabindex', '-1');
+    dialog.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Information</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    ${message}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(backdrop);
+    document.body.appendChild(dialog);
+    
+    // Close handlers
+    const closeDialog = () => {
+        dialog.classList.remove('show');
+        backdrop.classList.remove('show');
+        setTimeout(() => {
+            dialog.remove();
+            backdrop.remove();
+        }, 150);
+    };
+    
+    // Bind close events
+    dialog.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
+        btn.addEventListener('click', closeDialog);
+    });
+    
+    backdrop.addEventListener('click', closeDialog);
 }
 
 let currentModalProduct = null;

@@ -106,22 +106,6 @@ async function parseProductsExcel(filePath) {
     const zip = new AdmZip(filePath);
     const extractedImages = [];
     
-    // Validate first data row for required attributes
-    // const firstRow = jsonData[0];
-    // requiredColumns = ['Reference', 'Description'];
-    // const missingAttributes = [];
-    // // If any required attribute is missing in row, log and return empty products
-    // for (const col of requiredColumns) {
-    //     const value = firstRow[col];
-    //     if (value === null || value === undefined) {
-    //         missingAttributes.push(col);
-    //     }
-    // }
-
-    // if (missingAttributes.length > 0) {
-    //     return products;
-    // }
-
     // Clear images directory from previous images
     clearDirectory(imageDir, ['.gitkeep']);
     // Extract images and map to products
