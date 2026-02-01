@@ -37,14 +37,16 @@ async function loadProducts() {
 
         if(products.length === 0) {
               grid.innerHTML = `
-                <div class="col-12 text-center py-5">
-                    <i class="bi bi-box-seam" style="font-size: 4rem; color: #6c757d;"></i>
-                    <p class="text-muted mt-3 mb-0">No products found</p>
-                </div>
-                `;
+  <div class="col-12 text-center py-5">
+    <i class="bi bi-box-seam" style="font-size: 4rem; color: #6c757d;"></i>
+    <p class="text-muted mt-3 mb-0">No products found</p>
+  </div>
+`;
         } else {
-            displayProducts(products);
+        displayProducts(products);
         }
+xtra.dun.toUpperCase());
+        displayProducts(products);
 
     } catch (error) {
         grid.innerHTML = '<div class="col-12 text-center py-5"><p class="text-danger">Erreur lors du chargement des produits</p></div>';
@@ -324,7 +326,7 @@ function updateCartUI() {
     
     const cartHTML = items.map(item => {
         totalItems += item.quantity;
-        totalPrice += item.price_per_unit * item.quantity * item.units_per_box;
+        totalPrice += item.price_per_unit * item.quantity;
         const hasImage = item.image_url && item.image_url.trim() !== '' && item.image_url.toUpperCase() !== 'NO IMAGE';
         
         return `
@@ -340,10 +342,7 @@ function updateCartUI() {
                     <div class="flex-grow-1">
                         <div class="cart-item-title">${item.description}</div>
                         <div class="cart-item-price">${item.price_per_unit} €</div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="cart-item-quantity">Qté: ${item.quantity} x ${item.units_per_box}</div>
-                            <div class="cart-item-quantity">Totale ${item.quantity * item.units_per_box * item.price_per_unit} €</div>
-                        </div>
+                        <div class="cart-item-quantity">Qté: ${item.quantity}</div>
                     </div>
                     <button class="btn btn-sm btn-link text-danger" onclick="removeFromCart('${item.reference}')">
                         <i class="bi bi-x"></i>
@@ -487,10 +486,10 @@ function confirmOrder() {
         clientIdentifier: clientIdentifier,
         items: items.map(item => ({
             reference: item.reference,
-            quantity: item.quantity,
-            units_per_box: item.units_per_box
+            quantity: item.quantity
         }))
     };
+    console.log('Order Data:', orderData);
     // Send order to backend
     fetch('/api/orders', {
         method: 'POST',
@@ -517,7 +516,7 @@ function confirmOrder() {
         document.body.removeChild(downloadLink);
         
         // Show success message
-        showToast(`Commande créée avec succès!
+        alert(`Commande créée avec succès!
 Nombre de produits: ${data.productCount}
 Montant total: ${data.totalAmount} €
 Votre commande a été enregistrée avec succès.
@@ -537,6 +536,7 @@ Pour les expéditions hors Europe, les délais peuvent varier selon les prévisi
     .catch(error => {
         alert(`Erreur lors de la création de la commande: ${error.message}`);
     });
+    console.log('Order confirmed');
 }
 
 // Toast notification
@@ -554,58 +554,7 @@ function showToast(message) {
     `;
     document.body.appendChild(toast);
     
-    setTimeout(() => toast.remove(), 20000);
-}
-
-function showDialog(message) {
-    // Create modal backdrop
-    const backdrop = document.createElement('div');
-    backdrop.className = 'modal-backdrop fade show';
-    backdrop.style.zIndex = '1040';
-    
-    // Create modal dialog
-    const dialog = document.createElement('div');
-    dialog.className = 'modal fade show';
-    dialog.style.display = 'block';
-    dialog.style.zIndex = '1050';
-    dialog.setAttribute('tabindex', '-1');
-    dialog.innerHTML = `
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Information</h5>
-                    <button type="button" class="btn-close" data-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    ${message}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Add to page
-    document.body.appendChild(backdrop);
-    document.body.appendChild(dialog);
-    
-    // Close handlers
-    const closeDialog = () => {
-        dialog.classList.remove('show');
-        backdrop.classList.remove('show');
-        setTimeout(() => {
-            dialog.remove();
-            backdrop.remove();
-        }, 150);
-    };
-    
-    // Bind close events
-    dialog.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
-        btn.addEventListener('click', closeDialog);
-    });
-    
-    backdrop.addEventListener('click', closeDialog);
+    setTimeout(() => toast.remove(), 2000);
 }
 
 let currentModalProduct = null;
@@ -646,10 +595,22 @@ function openProductModal(reference, currentQuantity) {
     document.getElementById('modalProductTitle').textContent = product.description;
     document.getElementById('modalProductPrice').textContent = product.price_per_unit + ' €';
     document.getElementById('modalProductStock').textContent = `En Stock: ${product.stock_quantity}`;
-    // Build details table (using dummy data for now - will be replaced with real DB data)
+    
+    //    let details = `<tr><td><strong>Reference:</strong></td><td>${product.reference}</td></tr>
+                   able (using//  dUnite par box for now - will be replaced wunits_per_boxDB data)
+    cons// t details = `
+        <tr><td>Reference:</td><td>${pr// oduct.reference}</td></tr>
+        <tr><td>EAN:</td><td>// 8001480020429</td></tr>
+        <tr><td>Date//  d'expiration:</td><td>No</td></tr>
+        <tr// ><td>U Box:</td><td>10</td></tr>
+        <tr><td>Box L// ayer:</td><td>7</td></tr>
+        <tr><td>UD/Pal//  U Palet:</td><td>350</td></tr>
+        <tr><td>Box Pa// tel:</td><td>35</td></tr>
+        <tr><td>DUN:</td><td>080014801// 09704</td></tr>
+        <tr><td>Languages:</t// d>
+
     // Start with fixed Reference row
-    let details = `<tr><td><strong>Reference:</strong></td><td>${product.reference}</td></tr>
-                   <tr><td><strong>Unite par box:</strong></td><td>${product.units_per_box}</td></tr>`;
+    let details = `<tr><td><strong>Reference:</strong></td><td>${product.reference}</td></tr>`;
 
     // Add dynamic rows from product.extra if it exists
     if (product.extra && typeof product.extra === 'object') {
@@ -665,7 +626,9 @@ function openProductModal(reference, currentQuantity) {
             details += `<tr><td><strong>${formattedKey}:</strong></td><td>${value || 'N/A'}</td></tr>`;
         }
     }
-
+<td>espagnol, francais</td></tr>
+        <tr><td>PESO:</td><td>22.5</td></tr>
+    `;
     document.getElementById('modalProductDetails').innerHTML = details;
     
     // Set quantity input
@@ -691,7 +654,7 @@ function openProductModal(reference, currentQuantity) {
 function updateModalTotal() {
     if (!currentModalProduct) return;
     
-    const total = currentModalProduct.price_per_unit * modalQuantity * currentModalProduct.units_per_box;
+    const total = currentModalProduct.price_per_unit * modalQuantity;
     document.getElementById('modalTotal').textContent = total.toFixed(2) + ' €';
 }
 
