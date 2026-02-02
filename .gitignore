@@ -8,4 +8,5 @@ node_modules/
 public/images/products/*
 !public/images/products/.gitkeep
 # Uploads
-uploads/
+uploads/orders/*
+uploads/imports/*
