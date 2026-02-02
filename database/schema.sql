@@ -9,7 +9,8 @@ CREATE TABLE products (
     price_per_unit DECIMAL(10,2) NOT NULL,
     stock_quantity INTEGER NOT NULL DEFAULT 0,
     image_url VARCHAR(500),
-    extra_columns JSONB
+    extra_columns JSONB,
+    units_per_box INTEGER DEFAULT 1
 );
 
 -- Orders Table
