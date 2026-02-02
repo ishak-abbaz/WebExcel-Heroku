@@ -1,7 +1,8 @@
 # Dependencies
 node_modules/
 
-
+# Environment variables
+.env
 
 # Images
 public/images/products/*
