@@ -11,4 +11,4 @@ public/images/products/*
 uploads/orders/*
 uploads/imports/*
 !uploads/imports/.gitkeep
-!uploads/imports/.gitkeep
+!uploads/orders/.gitkeep
