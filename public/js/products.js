@@ -37,16 +37,14 @@ async function loadProducts() {
 
         if(products.length === 0) {
               grid.innerHTML = `
-  <div class="col-12 text-center py-5">
-    <i class="bi bi-box-seam" style="font-size: 4rem; color: #6c757d;"></i>
-    <p class="text-muted mt-3 mb-0">No products found</p>
-  </div>
-`;
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-box-seam" style="font-size: 4rem; color: #6c757d;"></i>
+                    <p class="text-muted mt-3 mb-0">No products found</p>
+                </div>
+                `;
         } else {
-        displayProducts(products);
+            displayProducts(products);
         }
-xtra.dun.toUpperCase());
-        displayProducts(products);
 
     } catch (error) {
         grid.innerHTML = '<div class="col-12 text-center py-5"><p class="text-danger">Erreur lors du chargement des produits</p></div>';
@@ -326,7 +324,7 @@ function updateCartUI() {
     
     const cartHTML = items.map(item => {
         totalItems += item.quantity;
-        totalPrice += item.price_per_unit * item.quantity;
+        totalPrice += item.price_per_unit * item.quantity * item.units_per_box;
         const hasImage = item.image_url && item.image_url.trim() !== '' && item.image_url.toUpperCase() !== 'NO IMAGE';
         
         return `
@@ -342,7 +340,10 @@ function updateCartUI() {
                     <div class="flex-grow-1">
                         <div class="cart-item-title">${item.description}</div>
                         <div class="cart-item-price">${item.price_per_unit} €</div>
-                        <div class="cart-item-quantity">Qté: ${item.quantity}</div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="cart-item-quantity">Qté: ${item.quantity} x ${item.units_per_box}</div>
+                            <div class="cart-item-quantity">Totale ${(item.quantity * item.units_per_box * item.price_per_unit).toFixed(2)} €</div>
+                        </div>
                     </div>
                     <button class="btn btn-sm btn-link text-danger" onclick="removeFromCart('${item.reference}')">
                         <i class="bi bi-x"></i>
@@ -392,7 +393,7 @@ function clearCart() {
     const items = Object.values(cart);
     
     if (items.length === 0) {
-        alert('Votre panier est vide');
+        showDialog('Votre panier est vide', 'info');
         return;
     }
 
@@ -427,7 +428,7 @@ function validateOrder() {
     const items = Object.values(cart);
     
     if (items.length === 0) {
-        alert('Votre panier est vide');
+        showDialog('Votre panier est vide', 'info');
         return;
     }
     
@@ -486,10 +487,10 @@ function confirmOrder() {
         clientIdentifier: clientIdentifier,
         items: items.map(item => ({
             reference: item.reference,
-            quantity: item.quantity
+            quantity: item.quantity,
+            units_per_box: item.units_per_box
         }))
     };
-    console.log('Order Data:', orderData);
     // Send order to backend
     fetch('/api/orders', {
         method: 'POST',
@@ -516,27 +517,29 @@ function confirmOrder() {
         document.body.removeChild(downloadLink);
         
         // Show success message
-        alert(`Commande créée avec succès!
-Nombre de produits: ${data.productCount}
-Montant total: ${data.totalAmount} €
-Votre commande a été enregistrée avec succès.
-Votre agent commercial, Amine Telitel, vous remercie pour votre confiance.
-La facture proforma vous sera transmise dans les plus brefs délais via WhatsApp ou par e-mail.
-Il vous contactera très prochainement afin de confirmer la commande.
-Informations supplémentaires :
-En général, la préparation de la proforma prend entre 1 heure et 48 heures, selon la disponibilité de l'agent commercial.
-Après confirmation de la commande et envoi du virement, la réception du paiement est généralement confirmée dans les 24 heures.
-Si vous souhaitez envoyer un camion pour récupérer la marchandise, veuillez contacter l'agent commercial pour établir un planning.
-Si la société prend en charge l'envoi de la commande (France, Belgique), la livraison est effectuée en environ 6 à 8 jours après confirmation du paiement.
-Pour les expéditions hors Europe, les délais peuvent varier selon les prévisions des compagnies maritimes.`);
+        const successMessage = `
+            <p><strong>Commande créée avec succès!</strong></p>
+            <p>Votre commande a été enregistrée avec succès.</p>
+            <p>Votre agent commercial, <strong>Amine Telitel</strong>, vous remercie pour votre confiance.</p>
+            <p>La facture proforma vous sera transmise dans les plus brefs délais via WhatsApp ou par e-mail.</p>
+            <p>Il vous contactera très prochainement afin de confirmer la commande.</p>
+            <hr>
+            <p><strong>Informations supplémentaires:</strong></p>
+            <ul style="text-align: left; font-size: 0.9rem;">
+                <li>En général, la préparation de la proforma prend entre 1 heure et 48 heures.</li>
+                <li>Pour l'envoi de camion, contactez l'agent commercial pour établir un planning.</li>
+                <li>Livraison France/Belgique: environ 6 à 8 jours après confirmation du paiement.</li>
+                <li>Pour les expéditions hors Europe, les délais peuvent varier.</li>
+            </ul>
+        `;
+        showDialog(successMessage, 'success');
         
         // Clear cart
         clearCart();
     })
     .catch(error => {
-        alert(`Erreur lors de la création de la commande: ${error.message}`);
+        showDialog(`Erreur lors de la création de la commande: ${error.message}`, 'error');
     });
-    console.log('Order confirmed');
 }
 
 // Toast notification
@@ -554,7 +557,74 @@ function showToast(message) {
     `;
     document.body.appendChild(toast);
     
-    setTimeout(() => toast.remove(), 2000);
+    setTimeout(() => toast.remove(), 20000);
+}
+
+function showDialog(message, type = 'info') {
+    // Create modal backdrop
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop fade show';
+    backdrop.style.zIndex = '1040';
+    
+    const headerColors = {
+        'error': '#dc3545',
+        'success': '#28a745',
+        'info': '#2F5F6F'
+    };
+    
+    const icons = {
+        'error': 'fas fa-exclamation-triangle',
+        'success': 'fas fa-check-circle',
+        'info': 'fas fa-info-circle'
+    };
+    
+    // Create modal dialog
+    const dialog = document.createElement('div');
+    dialog.className = 'modal fade show';
+    dialog.style.display = 'block';
+    dialog.style.zIndex = '1050';
+    dialog.setAttribute('tabindex', '-1');
+    dialog.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: ${headerColors[type]};">
+                    <h5 class="modal-title text-white">
+                        <i class="${icons[type]}"></i> ${type === 'error' ? 'Erreur' : type === 'success' ? 'Succès' : 'Information'}
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    ${message}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(backdrop);
+    document.body.appendChild(dialog);
+    
+    // Close handlers
+    const closeDialog = () => {
+        dialog.classList.remove('show');
+        backdrop.classList.remove('show');
+        setTimeout(() => {
+            dialog.remove();
+            backdrop.remove();
+        }, 150);
+    };
+    
+    // Bind close events
+    dialog.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
+        btn.addEventListener('click', closeDialog);
+    });
+    
+    backdrop.addEventListener('click', closeDialog);
 }
 
 let currentModalProduct = null;
@@ -595,22 +665,10 @@ function openProductModal(reference, currentQuantity) {
     document.getElementById('modalProductTitle').textContent = product.description;
     document.getElementById('modalProductPrice').textContent = product.price_per_unit + ' €';
     document.getElementById('modalProductStock').textContent = `En Stock: ${product.stock_quantity}`;
-    
-    //    let details = `<tr><td><strong>Reference:</strong></td><td>${product.reference}</td></tr>
-                   able (using//  dUnite par box for now - will be replaced wunits_per_boxDB data)
-    cons// t details = `
-        <tr><td>Reference:</td><td>${pr// oduct.reference}</td></tr>
-        <tr><td>EAN:</td><td>// 8001480020429</td></tr>
-        <tr><td>Date//  d'expiration:</td><td>No</td></tr>
-        <tr// ><td>U Box:</td><td>10</td></tr>
-        <tr><td>Box L// ayer:</td><td>7</td></tr>
-        <tr><td>UD/Pal//  U Palet:</td><td>350</td></tr>
-        <tr><td>Box Pa// tel:</td><td>35</td></tr>
-        <tr><td>DUN:</td><td>080014801// 09704</td></tr>
-        <tr><td>Languages:</t// d>
-
+    // Build details table (using dummy data for now - will be replaced with real DB data)
     // Start with fixed Reference row
-    let details = `<tr><td><strong>Reference:</strong></td><td>${product.reference}</td></tr>`;
+    let details = `<tr><td><strong>Reference:</strong></td><td>${product.reference}</td></tr>
+                   <tr><td><strong>Unite par box:</strong></td><td>${product.units_per_box}</td></tr>`;
 
     // Add dynamic rows from product.extra if it exists
     if (product.extra && typeof product.extra === 'object') {
@@ -626,9 +684,7 @@ function openProductModal(reference, currentQuantity) {
             details += `<tr><td><strong>${formattedKey}:</strong></td><td>${value || 'N/A'}</td></tr>`;
         }
     }
-<td>espagnol, francais</td></tr>
-        <tr><td>PESO:</td><td>22.5</td></tr>
-    `;
+
     document.getElementById('modalProductDetails').innerHTML = details;
     
     // Set quantity input
@@ -654,7 +710,7 @@ function openProductModal(reference, currentQuantity) {
 function updateModalTotal() {
     if (!currentModalProduct) return;
     
-    const total = currentModalProduct.price_per_unit * modalQuantity;
+    const total = currentModalProduct.price_per_unit * modalQuantity * currentModalProduct.units_per_box;
     document.getElementById('modalTotal').textContent = total.toFixed(2) + ' €';
 }
 
@@ -702,7 +758,7 @@ function showClearCartModal() {
     
     // Check if cart is empty
     if (items.length === 0) {
-        alert('Votre panier est déjà vide');
+        showDialog('Votre panier est déjà vide', 'info');
         return;
     }
     

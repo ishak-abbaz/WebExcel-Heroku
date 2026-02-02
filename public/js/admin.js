@@ -4,6 +4,68 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeAdminEventListeners();
 });
 
+function showDialog(message, type = 'info') {
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop fade show';
+    backdrop.style.zIndex = '1040';
+    
+    const headerColors = {
+        'error': '#dc3545',
+        'success': '#28a745',
+        'info': '#2F5F6F'
+    };
+    
+    const icons = {
+        'error': 'fas fa-exclamation-triangle',
+        'success': 'fas fa-check-circle',
+        'info': 'fas fa-info-circle'
+    };
+    
+    const dialog = document.createElement('div');
+    dialog.className = 'modal fade show';
+    dialog.style.display = 'block';
+    dialog.style.zIndex = '1050';
+    dialog.setAttribute('tabindex', '-1');
+    dialog.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: ${headerColors[type]};">
+                    <h5 class="modal-title text-white">
+                        <i class="${icons[type]}"></i> ${type === 'error' ? 'Erreur' : type === 'success' ? 'Succès' : 'Information'}
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    ${message}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(backdrop);
+    document.body.appendChild(dialog);
+    
+    const closeDialog = () => {
+        dialog.classList.remove('show');
+        backdrop.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(dialog);
+            document.body.removeChild(backdrop);
+        }, 150);
+    };
+    
+    dialog.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
+        btn.addEventListener('click', closeDialog);
+    });
+    
+    backdrop.addEventListener('click', closeDialog);
+}
+
 function initializeAdminEventListeners() {
     document.getElementById('uploadBtn').addEventListener('click', showInputDialog);
     document.getElementById('fileInput').addEventListener('change', uploadFile);
@@ -62,12 +124,12 @@ async function uploadFile(event){
         !allowedExtensions.includes(fileExtension) ||
         !allowedMimeTypes.includes(file.type)
     ) {
-        alert('Invalid file type. Please upload an Excel file (.xlsx or .xls)');
+        showDialog('Type de fichier invalide. Veuillez télécharger un fichier Excel (.xlsx ou .xls)', 'error');
         return;
     }
     // Check file size validity
     if (file.size > maxSize) {
-        alert('File is too large. Maximum size is 50MB');
+        showDialog('Le fichier est trop volumineux. Taille maximale: 50MB', 'error');
         return;
     }
     // Prepare form data for upload
@@ -83,12 +145,12 @@ async function uploadFile(event){
         const data = await response.json();
         
         if (response.ok) {
-            alert(`Success! Imported ${data.count} products`);
+            showDialog(`Succès! ${data.count} produits importés`, 'success');
         } else {
-            alert(`Error: ${data.error}`);
+            showDialog(`Erreur: ${data.error}`, 'error');
         }
     } catch (error) {
-        alert('Network error. Please try again.');
+        showDialog('Erreur réseau. Veuillez réessayer.', 'error');
     }
 }
 
