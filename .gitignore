@@ -10,3 +10,5 @@ public/images/products/*
 # Uploads
 uploads/orders/*
 uploads/imports/*
+!uploads/imports/.gitkeep
+!uploads/imports/.gitkeep
