@@ -434,9 +434,9 @@ function validateOrder() {
     
     // Clear previous input values and errors
     document.getElementById('clientIdentifier').value = '';
-    document.getElementById('clientIdentifierValidation').value = '';
+    // document.getElementById('clientIdentifierValidation').value = '';
     document.getElementById('clientIdentifier').classList.remove('is-invalid');
-    document.getElementById('clientIdentifierValidation').classList.remove('is-invalid');
+    // document.getElementById('clientIdentifierValidation').classList.remove('is-invalid');
     // Show client identifier modal
     $('#clientIdentifierModal').modal('show');
 }
@@ -444,38 +444,13 @@ function validateOrder() {
 function confirmOrder() {
     
     const clientIdentifier = document.getElementById('clientIdentifier').value.trim();
-    const clientIdentifierValidation = document.getElementById('clientIdentifierValidation').value.trim();
-    
-    // Validate inputs
-    let isValid = true;
+    // const clientIdentifierValidation = document.getElementById('clientIdentifierValidation').value.trim();
     
     if (!clientIdentifier) {
         document.getElementById('clientIdentifier').classList.add('is-invalid');
-        isValid = false;
+        return;
     } else {
         document.getElementById('clientIdentifier').classList.remove('is-invalid');
-    }
-    
-    if (!clientIdentifierValidation) {
-        document.getElementById('clientIdentifierValidation').classList.add('is-invalid');
-        isValid = false;
-        document.getElementById('validationEmptyError').style.display = 'block';
-        document.getElementById('validationMismatchError').style.display = 'none';
-    } else {
-        document.getElementById('clientIdentifierValidation').classList.remove('is-invalid');
-    }
-    if (clientIdentifier !== clientIdentifierValidation) {
-        document.getElementById('clientIdentifierValidation').classList.add('is-invalid');
-        isValid = false;
-        document.getElementById('validationEmptyError').style.display = 'none';
-        document.getElementById('validationMismatchError').style.display = 'block';
-        
-    } else {
-        document.getElementById('clientIdentifierValidation').classList.remove('is-invalid');
-    }
-    
-    if (!isValid) {
-        return;
     }
     
     // Close modal
@@ -697,7 +672,6 @@ function openProductModal(reference, currentQuantity) {
     // Show modal
     const modal = new bootstrap.Modal(document.getElementById('productModal'));
     modal.show();
-    // TODO: Handle modal close to be initialized in initializeModalListeners
     document.getElementById('modalBtnClose').addEventListener('click', () => {
         modal.hide();
     });
