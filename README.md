@@ -29,3 +29,9 @@ A web-based product catalog and order management system with Excel import/export
    ```bash
    git clone <your-repo-url>
    cd WebExcel
+
+https://5170aac071d0d3ef153e95f00fb552bf.r2.cloudflarestorage.com
+
+access key id: 07694b643331e91fd0f3e0ef99956323
+
+secret : 55f7e627b38fd0f124a921c23717e935b20f6576d0de4f04de39fd77c381d561
