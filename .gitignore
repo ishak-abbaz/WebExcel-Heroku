@@ -9,6 +9,6 @@ public/images/products/*
 !public/images/products/.gitkeep
 # Uploads
 uploads/orders/*
-uploads/imports/*
+
 !uploads/imports/.gitkeep
 !uploads/orders/.gitkeep
