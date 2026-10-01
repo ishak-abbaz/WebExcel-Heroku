@@ -1,6 +1,9 @@
 const ExcelJS = require('exceljs');
 const path = require('path');
 const fs = require('fs').promises;
+const { saveFile } = require('./storage');
+
+const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
 /**
  * Template cache - loaded once on first use
@@ -127,10 +130,11 @@ function createReferenceFormula(item) {
 
 /**
  * Generate an Excel file for an order using cached template structure
+ * and store it in the bucket
  * @param {Object} orderData - Order information
  * @param {Array} orderData.items - Array of cart items with product details
  * @param {string} orderData.clientIdentifier - Client identifier
- * @returns {string} - Path to the generated Excel file
+ * @returns {string} - Path (/uploads/orders/<file>) to store in the database
  */
 async function generateOrderExcel(orderData) {
     const { items, clientIdentifier } = orderData;
@@ -258,20 +262,19 @@ async function generateOrderExcel(orderData) {
         currentRow++;
     });
     
-    // Ensure output directory exists
-    const ordersDir = path.join(__dirname, '../../uploads/orders');
-    await fs.mkdir(ordersDir, { recursive: true });
-    
-    // Generate filename with client identifier
-    const filename = `${clientIdentifier}.xlsx`;
-    const filePath = path.join(ordersDir, filename);
+    // Generate filename with client identifier (slashes removed so it stays a single file name)
+    const safeIdentifier = String(clientIdentifier).replace(/[\\/]/g, '_');
+    const filename = `${safeIdentifier}.xlsx`;
 
-    // Save the file (disable shared formulas to avoid conflicts)
-    await workbook.xlsx.writeFile(filePath, { 
+    // Build the file in memory (disable shared formulas to avoid conflicts)
+    const buffer = await workbook.xlsx.writeBuffer({ 
         useSharedFormulas: false 
     });
 
-    // Return relative path for database storage
+    // Store it in the bucket instead of the dyno's disk
+    await saveFile(`uploads/orders/${filename}`, Buffer.from(buffer), XLSX_MIME);
+
+    // Return relative path for database storage (same format as before)
     return `/uploads/orders/${filename}`;
 }
 

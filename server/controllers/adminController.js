@@ -1,14 +1,16 @@
 // Import necessary modules
 const pool = require('../config/database');
-const { parseProductsExcel, clearDirectory } = require('../utils/excelParser');
+const { parseProductsExcel, clearDirectory, removeStaleProductImages } = require('../utils/excelParser');
+const { saveFile, deletePrefixExcept } = require('../utils/storage');
 const fs = require('fs');
 const fsPromises = require('fs').promises;
 const path = require('path');
+
 // Controller function to handle product imports
 async function importProducts(req, res) {
     // Get a client from the connection pool (Database connection)
     const client = await pool.connect();
-    
+
     try {
         // Check if file uploaded
         if (!req.file) {
@@ -17,8 +19,8 @@ async function importProducts(req, res) {
         // Get uploaded file path
         const filePath = req.file.path;
 
-        // Parse Excel file
-        const products = await parseProductsExcel(filePath);
+        // Parse Excel file (product images are uploaded to the bucket here)
+        const { products, imageKeys } = await parseProductsExcel(filePath);
         // Check if any products were parsed
         if (products.length === 0) {
             fs.unlinkSync(filePath);
@@ -29,10 +31,10 @@ async function importProducts(req, res) {
         clearDirectory('uploads/imports/', [fileName]);
 
         await client.query('BEGIN');
-        
+
         // Delete all existing products
         await client.query('DELETE FROM products');
-        
+
         // Insert new products
         if (products.length > 0) {
             const CHUNK_SIZE = 100;
@@ -57,7 +59,7 @@ async function importProducts(req, res) {
                 // Final query for the chunk insertion
                 const query = `
                     INSERT INTO products (
-                        reference, description, price_per_unit, 
+                        reference, description, price_per_unit,
                         stock_quantity, image_url, extra_columns, units_per_box
                     )
                     VALUES ${values}
@@ -70,19 +72,31 @@ async function importProducts(req, res) {
 
         // Commit transaction
         await client.query('COMMIT');
-        
+
+        // After a successful import: keep only the new images and the current import file
+        // in the bucket. Failures here are logged but do not fail the import.
+        try {
+            await removeStaleProductImages(imageKeys);
+
+            const importKey = `uploads/imports/${fileName}`;
+            await saveFile(importKey, await fsPromises.readFile(filePath), req.file.mimetype);
+            await deletePrefixExcept('uploads/imports/', [importKey]);
+        } catch (storageError) {
+            console.error('Post-import storage cleanup failed:', storageError);
+        }
+
         // Success response
         res.status(200).json({
             success: true,
             message: `Successfully imported ${products.length} products`,
             count: products.length
         });
-        
+
     } catch (error) {
         // Rollback on error
         await client.query('ROLLBACK');
         console.error('Import error:', error);
-        
+
         // Cleanup uploaded file
         if (req.file && req.file.path) {
             try {
@@ -91,7 +105,7 @@ async function importProducts(req, res) {
                 console.error('Failed to delete temp file:', unlinkError);
             }
         }
-        
+
         res.status(500).json({
             error: 'Failed to import products',
             details: error.message

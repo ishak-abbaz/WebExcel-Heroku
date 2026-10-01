@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/database');
+const { deleteKeys } = require('../utils/storage');
 // const { generateOrderExcel } = require('../utils/excelGenerator');
 const { generateOrderExcel } = require('../utils/excelFiller');
 
@@ -78,7 +79,7 @@ router.post('/', async (req, res) => {
         
         const orderNumber = orderResult.rows[0].order_number;
         
-        // Generate Excel file
+        // Generate Excel file (stored in the bucket)
         const filePath = await generateOrderExcel({
             items: enrichedItems,
             clientIdentifier
@@ -162,19 +163,19 @@ router.delete('/:id', async (req, res) => {
             [orderNumber]
         );
         
-        // Delete Excel file if exists
-        const fs = require('fs');
-        const path = require('path');
-        
+        await client.query('COMMIT');
+
+        // Delete the Excel file from the bucket (after the database delete succeeded)
         if (order.file_path) {
-            const filePath = path.join(__dirname, '../../', order.file_path);
-            
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
+            try {
+                const key = order.file_path.replace(/^\/+/, '');
+                if (key.startsWith('uploads/orders/')) {
+                    await deleteKeys([key]);
+                }
+            } catch (fileError) {
+                console.error('Failed to delete order file from bucket:', fileError);
             }
         }
-        
-        await client.query('COMMIT');
         
         res.json({
             success: true,
