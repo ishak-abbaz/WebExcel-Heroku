@@ -8,7 +8,7 @@ const { saveFile, deletePrefixExcept } = require('./storage');
 
 // Product images live in the bucket under this prefix
 const IMAGE_PREFIX = 'images/products/';
-const UPLOAD_BATCH_SIZE = 10;
+const UPLOAD_BATCH_SIZE = 20;
 const IMAGE_MIME = {
     '.png': 'image/png',
     '.jpg': 'image/jpeg',
